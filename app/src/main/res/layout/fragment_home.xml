@@ -58,7 +58,7 @@
         android:textSize="32sp"
         android:layout_marginTop="10dp"
         android:textColor="@color/black"
-        android:text="Most PLayed"
+        android:text="Most Played"
         android:layout_below="@id/albums_linear"
         android:layout_marginLeft="30dp"
         />
