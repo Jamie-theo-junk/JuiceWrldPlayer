@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/music_card_relative"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+<androidx.cardview.widget.CardView
+    android:id="@+id/image_card_view"
+    android:layout_width="50dp"
+    android:layout_height="50dp"
+    app:cardBackgroundColor="@color/grey"
+    app:cardCornerRadius="10dp"
+    android:layout_centerVertical="true"
+    android:layout_marginStart="50dp"
+    >
+ <ImageView
+     android:id="@+id/song_image"
+     android:layout_width="match_parent"
+     android:layout_height="match_parent"/>
+</androidx.cardview.widget.CardView>
+    <RelativeLayout
+        android:id="@+id/songInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@id/image_card_view"
+        android:layout_marginLeft="15dp">
+    <TextView
+        android:id="@+id/song_name_txt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Song Name"
+        />
+    <TextView
+        android:id="@+id/album_txt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/song_name_txt"
+        android:text="album"/>
+    </RelativeLayout>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/line"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"/>
+
+</RelativeLayout>
