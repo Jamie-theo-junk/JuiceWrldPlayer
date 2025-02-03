@@ -1,11 +1,16 @@
 package com.Jamie.juicewrldmusicplayer
 
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.ServiceConnection
 import android.media.MediaPlayer
 import android.os.Bundle
+import android.os.Handler
+import android.os.IBinder
+import android.os.Looper
 import android.util.Log
 import android.widget.SeekBar
 import androidx.activity.enableEdgeToEdge
@@ -14,13 +19,32 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.Jamie.juicewrldmusicplayer.databinding.ActivitySongPlayingBinding
 
-class SongPlaying : AppCompatActivity(), SeekBarUpdateListener {
+class SongPlaying : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
+
+    //TODO fix the minor bugs keeps crashing when moving to other songs
 
     private val TAG = "SongPlaying"
     private lateinit var binding: ActivitySongPlayingBinding
-    private var mMediaPlayer: MediaPlayer? = null
-    private var duration = 0
-    private lateinit var seekBarReceiver: SeekBarReceiver
+
+    private lateinit var seekBar: SeekBar
+    private lateinit var mediaPlayerService: MediaPlayerService
+    private var serviceBound = false
+    private val serviceConnection = object : ServiceConnection{
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val binder = service as MediaPlayerService.LocalBinder
+            mediaPlayerService = binder.getService()
+            serviceBound = true
+            Log.d(TAG, "onServiceConnected: connected")
+            init()
+            updateSeekBar()
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            serviceBound = false
+            Log.d(TAG, "onServiceConnected: nota connected")
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,13 +60,22 @@ class SongPlaying : AppCompatActivity(), SeekBarUpdateListener {
             insets
         }
 
-        seekBarReceiver = SeekBarReceiver(this) // Initialize BroadcastReceiver
-        init()
-        setupSeekBar()
+        val intentMediaPlayerService = Intent(this, MediaPlayerService::class.java)
+        bindService(intentMediaPlayerService, serviceConnection, Context.BIND_AUTO_CREATE)
+
+
+
     }
 
     private fun init() {
+        seekBar = binding.songSeekBar
+        seekBar.setOnSeekBarChangeListener(this)
+
+
+
         val song = intent.getParcelableExtra<Song>("song")
+
+
 
         if (song != null) {
             Log.d(TAG, "init: Playing ${song.songName}")
@@ -52,60 +85,54 @@ class SongPlaying : AppCompatActivity(), SeekBarUpdateListener {
 
         song?.let {
             uiLogic(it) // 🔹 Call the UI logic method
-            val mediaServiceIntent = Intent(this, MediaPlayerService::class.java).apply {
-                action = MediaPlayerService.ACTION_PLAY
-                putExtra("song", it)
-            }
-            startService(mediaServiceIntent)
+            mediaPlayerService.playMusic(it)
         }
     }
 
-    private fun setupSeekBar() {
-        binding.songSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser) seekTo(progress)
+    private fun updateSeekBar(){
+        if(!serviceBound || mediaPlayerService.mediaPlayer.duration == 0) return
+
+        seekBar.max = mediaPlayerService.mediaPlayer.duration
+        Log.d(TAG, "updateSeekBar: ${seekBar.max}")
+
+        val handler = Handler(Looper.getMainLooper())
+        val runnable = object : Runnable {
+            override fun run(){
+                if(mediaPlayerService.mediaPlayer.isPlaying){
+                    seekBar.progress = mediaPlayerService.mediaPlayer.currentPosition
+                    handler.postDelayed(this, 1000)
+
+                }
             }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                seekTo(seekBar?.progress ?: 0)
-            }
-        })
-    }
-
-    private fun seekTo(position: Int) {
-        val intent = Intent(this, MediaPlayerService::class.java).apply {
-            action = MediaPlayerService.ACTION_SEEK
-            putExtra("seekTo", position)
         }
-        startService(intent)
+        handler.postDelayed(runnable, 1000)
     }
 
-    // 🔹 BroadcastReceiver for SeekBar updates
-    override fun onSeekBarUpdate(currentPosition: Int, duration: Int) {
-        binding.songSeekBar.max = duration
-        binding.songSeekBar.progress = currentPosition
-    }
-
-    override fun onResume() {
-        super.onResume()
-        registerReceiver(
-            seekBarReceiver,
-            IntentFilter(MediaPlayerService.ACTION_UPDATE_SEEKBAR),
-            Context.RECEIVER_NOT_EXPORTED
-        )
-    }
-
-    override fun onPause() {
-        super.onPause()
-        unregisterReceiver(seekBarReceiver)
-    }
-
-    // 🔹 UI Logic for updating song details
     private fun uiLogic(song: Song) {
         binding.songImage.setImageResource(song.albumImage)  // Set album image
         binding.songTitle.text = song.songName  // Set song title
         binding.songAlbum.text = song.albumName  // Set album name
     }
+
+    override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+        if (fromUser && serviceBound) {
+            mediaPlayerService.mediaPlayer.seekTo(progress)
+        }
+    }
+
+    override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+    override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+
+    override fun onStart() {
+        super.onStart()
+        Intent(this, MediaPlayerService::class.java).also { intent ->
+            bindService(intent, serviceConnection, BIND_AUTO_CREATE)
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (serviceBound) unbindService(serviceConnection)
+    }
 }
+
