@@ -59,6 +59,10 @@ class MediaPlayerService: Service() {
         }
     }
 
+    fun resumeMusic(){
+        mediaPlayer.start()
+    }
+
     fun pauseMusic(){
         mediaPlayer.pause()
     }

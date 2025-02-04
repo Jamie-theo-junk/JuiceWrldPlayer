@@ -12,7 +12,9 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
+import android.widget.ImageView
 import android.widget.SeekBar
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -29,6 +31,9 @@ class SongPlaying : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
     private lateinit var seekBar: SeekBar
     private lateinit var mediaPlayerService: MediaPlayerService
     private var serviceBound = false
+    private lateinit var pauseImageButton: ImageView
+    private lateinit var maxTimeTextView : TextView
+    private lateinit var currentTimeTextView : TextView
     private val serviceConnection = object : ServiceConnection{
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val binder = service as MediaPlayerService.LocalBinder
@@ -68,25 +73,50 @@ class SongPlaying : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
     }
 
     private fun init() {
+
+        pauseImageButton = binding.pauseResumeButton
+        var isPlaying = true
+        pauseImageButton.setOnClickListener{
+            if(isPlaying){
+                mediaPlayerService.pauseMusic()
+                isPlaying = false
+                pauseImageButton.setImageResource(R.drawable.pause)
+            }
+            else{
+                mediaPlayerService.resumeMusic()
+                isPlaying = true
+                pauseImageButton.setImageResource(R.drawable.play_circle_outline)
+                updateSeekBar()
+            }
+        }
+
+        //initializing the timer duration
+        maxTimeTextView = binding.maxDuration
+        currentTimeTextView = binding.duration
         seekBar = binding.songSeekBar
         seekBar.setOnSeekBarChangeListener(this)
 
 
 
         val song = intent.getParcelableExtra<Song>("song")
-
-
-
         if (song != null) {
             Log.d(TAG, "init: Playing ${song.songName}")
         } else {
             Log.d(TAG, "init: No song data received")
         }
-
         song?.let {
-            uiLogic(it) // 🔹 Call the UI logic method
+            uiLogic(it)
             mediaPlayerService.playMusic(it)
+            var formattedtime = formatDuration(mediaPlayerService.mediaPlayer.duration.toLong())
+            maxTimeTextView.text = formattedtime
         }
+    }
+
+    fun formatDuration(duration: Long): String {
+        val minutes = duration / 60000
+        val seconds = (duration % 60000) / 1000
+
+        return String.format("%02d:%02d", minutes, seconds)
     }
 
     private fun updateSeekBar(){
@@ -100,6 +130,8 @@ class SongPlaying : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
             override fun run(){
                 if(mediaPlayerService.mediaPlayer.isPlaying){
                     seekBar.progress = mediaPlayerService.mediaPlayer.currentPosition
+                    var currentFormattedTime = formatDuration(mediaPlayerService.mediaPlayer.currentPosition.toLong())
+                    currentTimeTextView.text = currentFormattedTime
                     handler.postDelayed(this, 1000)
 
                 }
@@ -117,6 +149,7 @@ class SongPlaying : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
         if (fromUser && serviceBound) {
             mediaPlayerService.mediaPlayer.seekTo(progress)
+            updateSeekBar()
         }
     }
 
