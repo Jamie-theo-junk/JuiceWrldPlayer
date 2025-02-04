@@ -2,14 +2,13 @@ package com.Jamie.juicewrldmusicplayer
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
-import androidx.cardview.widget.CardView
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 
 
@@ -18,10 +17,11 @@ class ListRecyclerAdapter(
     private val songs: List<Song>
 ) : RecyclerView.Adapter<ListRecyclerAdapter.SongViewHolder>(){
 
+    private val TAG = "ListRecyclerAdapter"
     class SongViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val songName: TextView = itemView.findViewById(R.id.song_name_txt)
         val image: ImageView = itemView.findViewById(R.id.song_image)
-        val ablum: TextView = itemView.findViewById(R.id.album_txt)
+        val album: TextView = itemView.findViewById(R.id.album_txt)
         val relativeCard: RelativeLayout = itemView.findViewById(R.id.music_card_relative)
     }
 
@@ -37,10 +37,13 @@ class ListRecyclerAdapter(
     override fun onBindViewHolder(holder: SongViewHolder, position: Int) {
         val song = songs[position]
         holder.songName.text = song.songName
-        holder.ablum.text = song.albumName
+        holder.album.text = song.albumName
         holder.image.setImageResource(song.albumImage)
         holder.relativeCard.setOnClickListener {
             val toSong = Intent(context, SongPlaying::class.java)
+            Log.d(TAG, "onBindViewHolder: ${song.songName}")
+            Log.d(TAG, "onBindViewHolder: ${song.albumName }")
+            Log.d(TAG, "onBindViewHolder: ${song.audioFile}")
             toSong.putExtra("song",song)
             context.startActivity(toSong)
         }
