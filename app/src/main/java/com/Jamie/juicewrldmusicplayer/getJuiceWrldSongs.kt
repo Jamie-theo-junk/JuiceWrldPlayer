@@ -16,7 +16,7 @@ object getJuiceWrldSongs{
         MediaStore.Audio.Media.ALBUM,
         MediaStore.Audio.Media.DATA,
         MediaStore.Audio.Media.MIME_TYPE
-    )
+    )//TODO REMOVE THIS
 
         val selection = "${MediaStore.Audio.Media.ARTIST} Like ?"
         val selectionArgs = arrayOf("%Juice%")

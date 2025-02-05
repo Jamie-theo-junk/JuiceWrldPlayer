@@ -1,8 +1,6 @@
 package com.Jamie.juicewrldmusicplayer
 
-import android.os.Parcel
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
+
 
 
 
@@ -16,6 +14,6 @@ data class Song(
 )
 
 
-object SongFactory {
-    fun createSong(songName: String, albumName:String, albumImage:Int, audioFile:String, amountPlayed:Int): Song = Song(1, songName, albumName, albumImage, audioFile, amountPlayed)
-}
+//object SongFactory {
+//    fun createSong(songName: String, albumName:String, albumImage:Int, audioFile:String, amountPlayed:Int): Song = Song(1, songName, albumName, albumImage, audioFile, amountPlayed)
+//}

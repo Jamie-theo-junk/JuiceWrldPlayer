@@ -7,7 +7,6 @@ import android.media.MediaPlayer
 import android.os.Binder
 import android.os.IBinder
 import android.util.Log
-import android.os.Handler
 import java.io.IOException
 
 class MediaPlayerService: Service() {
