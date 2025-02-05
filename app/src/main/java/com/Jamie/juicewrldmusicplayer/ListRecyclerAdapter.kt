@@ -44,7 +44,7 @@ class ListRecyclerAdapter(
             Log.d(TAG, "onBindViewHolder: ${song.songName}")
             Log.d(TAG, "onBindViewHolder: ${song.albumName }")
             Log.d(TAG, "onBindViewHolder: ${song.audioFile}")
-            toSong.putExtra("song",song)
+            toSong.putExtra("songId",song.id)
             context.startActivity(toSong)
         }
 

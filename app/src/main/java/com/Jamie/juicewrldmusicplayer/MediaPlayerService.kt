@@ -47,9 +47,8 @@ class MediaPlayerService: Service() {
 //            }
             mediaPlayer.apply {
                 Log.d(TAG, "playMusic: playing ${song.audioFile}")
-                val afd = applicationContext.resources.openRawResourceFd(song.audioFile)
-                setDataSource(afd?.fileDescriptor, afd?.startOffset ?: 0, afd?.length ?: 0)
-                afd?.close()
+
+                setDataSource(song.audioFile)
                 prepare()
                 start()
             }

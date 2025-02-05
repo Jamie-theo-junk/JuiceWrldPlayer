@@ -31,8 +31,8 @@ class ListFragment : Fragment() {
     private fun init(){
         songRecycler = binding.songListRecycler
         songRecycler.layoutManager = LinearLayoutManager(requireContext())
-
-        val songs = SongRepository.songs//get the songs from the songs repository
+        val dbHelper = DbHelper(this.requireContext())
+        val songs = dbHelper.getAllSongs()
         adapter = ListRecyclerAdapter(this.requireContext(),songs)
         songRecycler.adapter = adapter
 

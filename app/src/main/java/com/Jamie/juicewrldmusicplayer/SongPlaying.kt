@@ -73,7 +73,7 @@ class SongPlaying : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
     }
 
     private fun init() {
-
+        val dbHelper = DbHelper(this)
         pauseImageButton = binding.pauseResumeButton
         var isPlaying = true
         pauseImageButton.setOnClickListener{
@@ -98,13 +98,15 @@ class SongPlaying : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
 
 
 
-        val song = intent.getParcelableExtra<Song>("song")
-        if (song != null) {
-            Log.d(TAG, "init: Playing ${song.songName}")
+        val songId = intent.getIntExtra("songId",0)
+        val selectedSong = dbHelper.getSongById(songId)
+        if (selectedSong != null) {
+            Log.d(TAG, "init: Playing ${selectedSong.songName}")
+            Log.d(TAG, "init: Playing ${selectedSong.audioFile}")
         } else {
             Log.d(TAG, "init: No song data received")
         }
-        song?.let {
+        selectedSong?.let {
             uiLogic(it)
             mediaPlayerService.playMusic(it)
             var formattedtime = formatDuration(mediaPlayerService.mediaPlayer.duration.toLong())
