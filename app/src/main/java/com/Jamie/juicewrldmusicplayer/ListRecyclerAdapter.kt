@@ -1,7 +1,9 @@
 package com.Jamie.juicewrldmusicplayer
 
+import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -38,7 +40,11 @@ class ListRecyclerAdapter(
         val song = songs[position]
         holder.songName.text = song.songName
         holder.album.text = song.albumName
-        holder.image.setImageResource(song.albumImage)
+        val albumUri = ContentUris.withAppendedId(
+            Uri.parse("content://media/external/audio/albumart"),
+            song.albumImage
+            )
+        holder.image.setImageURI(albumUri)
         holder.relativeCard.setOnClickListener {
             val toSong = Intent(context, SongPlaying::class.java)
             Log.d(TAG, "onBindViewHolder: ${song.songName}")

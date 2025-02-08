@@ -1,9 +1,12 @@
 package com.Jamie.juicewrldmusicplayer
 
+import android.app.Activity
 import android.content.ComponentName
+import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
@@ -31,6 +34,8 @@ class SongPlaying : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
     private lateinit var pauseImageButton: ImageView
     private lateinit var maxTimeTextView : TextView
     private lateinit var currentTimeTextView : TextView
+    private val handler = Handler(Looper.getMainLooper())
+    private lateinit var runnable: Runnable
     private val serviceConnection = object : ServiceConnection{
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val binder = service as MediaPlayerService.LocalBinder
@@ -64,13 +69,11 @@ class SongPlaying : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
 
         val intentMediaPlayerService = Intent(this, MediaPlayerService::class.java)
         bindService(intentMediaPlayerService, serviceConnection, Context.BIND_AUTO_CREATE)
-
-
-
     }
 
     private fun init() {
         val dbHelper = DbHelper(this)
+
         pauseImageButton = binding.pauseResumeButton
         var isPlaying = true
         pauseImageButton.setOnClickListener{
@@ -106,7 +109,7 @@ class SongPlaying : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
         selectedSong?.let {
             uiLogic(it)
             mediaPlayerService.playMusic(it)
-            var formattedtime = formatDuration(mediaPlayerService.mediaPlayer.duration.toLong())
+            var formattedtime = formatDuration(mediaPlayerService.mediaPlayer!!.duration.toLong())
             maxTimeTextView.text = formattedtime
         }
     }
@@ -119,17 +122,17 @@ class SongPlaying : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
     }
 
     private fun updateSeekBar(){
-        if(!serviceBound || mediaPlayerService.mediaPlayer.duration == 0) return
+        if(!serviceBound || mediaPlayerService.mediaPlayer!!.duration == 0) return
 
-        seekBar.max = mediaPlayerService.mediaPlayer.duration
+        seekBar.max = mediaPlayerService.mediaPlayer!!.duration
         Log.d(TAG, "updateSeekBar: ${seekBar.max}")
 
-        val handler = Handler(Looper.getMainLooper())
-        val runnable = object : Runnable {
+
+         runnable = object : Runnable {
             override fun run(){
-                if(mediaPlayerService.mediaPlayer.isPlaying){
-                    seekBar.progress = mediaPlayerService.mediaPlayer.currentPosition
-                    var currentFormattedTime = formatDuration(mediaPlayerService.mediaPlayer.currentPosition.toLong())
+                if(mediaPlayerService.mediaPlayer!!.isPlaying){
+                    seekBar.progress = mediaPlayerService.mediaPlayer!!.currentPosition
+                    var currentFormattedTime = formatDuration(mediaPlayerService.mediaPlayer!!.currentPosition.toLong())
                     currentTimeTextView.text = currentFormattedTime
                     handler.postDelayed(this, 1000)
 
@@ -138,16 +141,23 @@ class SongPlaying : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
         }
         handler.postDelayed(runnable, 1000)
     }
+    private fun stopSeekBarUpdate() {
+        handler.removeCallbacks(runnable)
+    }
 
     private fun uiLogic(song: Song) {
-        binding.songImage.setImageResource(song.albumImage)  // Set album image
+        val albumUri = ContentUris.withAppendedId(
+            Uri.parse("content://media/external/audio/albumart"),
+            song.albumImage
+        )
+        binding.songImage.setImageURI(albumUri)  // Set album image
         binding.songTitle.text = song.songName  // Set song title
         binding.songAlbum.text = song.albumName  // Set album name
     }
 
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
         if (fromUser && serviceBound) {
-            mediaPlayerService.mediaPlayer.seekTo(progress)
+            mediaPlayerService.mediaPlayer!!.seekTo(progress)
             updateSeekBar()
         }
     }
@@ -165,6 +175,12 @@ class SongPlaying : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
     override fun onStop() {
         super.onStop()
         if (serviceBound) unbindService(serviceConnection)
+        stopSeekBarUpdate()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopSeekBarUpdate()
     }
 }
 

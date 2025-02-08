@@ -10,8 +10,10 @@ import android.util.Log
 import java.io.IOException
 
 class MediaPlayerService: Service() {
-     lateinit var mediaPlayer: MediaPlayer
+      var mediaPlayer: MediaPlayer? = null
     private val binder = LocalBinder()
+    var currentSong: Song? = null
+
 
     inner class LocalBinder: Binder(){
         fun getService(): MediaPlayerService = this@MediaPlayerService
@@ -27,7 +29,7 @@ class MediaPlayerService: Service() {
     }
 
     private fun initializeMediaPlayer(){
-        mediaPlayer = MediaPlayer().apply{
+      mediaPlayer = MediaPlayer().apply{
             setAudioAttributes(
                 AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
@@ -39,12 +41,18 @@ class MediaPlayerService: Service() {
 
     fun playMusic(song:Song){
         try{
-//            mediaPlayer.apply {
-//                setDataSource(path)
-//                prepare()
-//                start()
-//            }
-            mediaPlayer.apply {
+            if (currentSong?.audioFile == song.audioFile && mediaPlayer?.isPlaying == true) {
+                return
+            }
+
+            mediaPlayer?.apply {
+                stop()
+                reset()
+                release()
+            }
+
+            initializeMediaPlayer()
+            mediaPlayer?.apply {
                 Log.d(TAG, "playMusic: playing ${song.audioFile}")
 
                 setDataSource(song.audioFile)
@@ -58,21 +66,21 @@ class MediaPlayerService: Service() {
     }
 
     fun resumeMusic(){
-        mediaPlayer.start()
+        mediaPlayer?.start()
     }
 
     fun pauseMusic(){
-        mediaPlayer.pause()
+        mediaPlayer?.pause()
     }
 
     fun stopMusic(){
-        mediaPlayer.stop()
-        mediaPlayer.release()
+        mediaPlayer?.stop()
+        mediaPlayer?.release()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        stopMusic()
+
     }
 
     companion object{

@@ -43,7 +43,7 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         val db = writableDatabase
         val contentValues = ContentValues()
         contentValues.put(SONG_NAME_COL, song.songName)
-        contentValues.put(ALBUM_COL, song.albumImage)
+        contentValues.put(ALBUM_COL, song.albumName)
         contentValues.put(ALBUM_IMAGE_COL, song.albumImage)
         contentValues.put(AUDIO_FILE_COL, song.audioFile)
         contentValues.put(AMOUNT_PLAYED, song.amountPlayed)
@@ -77,7 +77,7 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
                             getInt(idIndex),
                             getString(songNameIndex),
                             getString(albumIndex),
-                            getInt(albumImageIndex),
+                            getLong(albumImageIndex),
                             getString(audioFileIndex),
                             getInt(amountPlayedIndex)
                         )
@@ -141,7 +141,7 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
                     id = cursor.getInt(idIndex),
                     songName = cursor.getString(songNameIndex),
                     albumName = cursor.getString(albumIndex),
-                    albumImage = cursor.getInt(albumImageIndex),
+                    albumImage = cursor.getLong(albumImageIndex),
                     audioFile = cursor.getString(audioFileIndex),
                     amountPlayed = cursor.getInt(amountPlayedIndex)
                 )
