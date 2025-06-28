@@ -19,7 +19,6 @@
 
 - **Language:** Kotlin
 - **UI:** Android XML layouts, Material Design
-- **Architecture:** MVVM
 - **Audio Engine:**  `MediaPlayer`
 
 ---
