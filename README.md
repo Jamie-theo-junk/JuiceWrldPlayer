@@ -33,7 +33,9 @@
 2. **Open the project in Android Studio**
 3. **Build and Run the app on your emulator or device**
 
-##Dependencies
+   ---
+
+## Dependencies
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
