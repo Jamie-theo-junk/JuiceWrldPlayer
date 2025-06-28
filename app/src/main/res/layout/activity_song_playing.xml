@@ -28,7 +28,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/song_image_card"
-        android:layout_marginLeft="60dp"
+        android:layout_alignStart="@id/song_image_card"
         android:layout_marginTop="20dp"
         android:textColor="@color/black"
         android:textSize="32dp"
@@ -38,17 +38,73 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/song_title"
-        android:layout_marginLeft="60dp"
+        android:layout_alignStart="@id/song_image_card"
         android:textSize="20dp"
         android:layout_marginTop="10dp"
         android:text="Song Album"/>
-
-    <SeekBar
-        android:id="@+id/song_seek_bar"
-        android:layout_below="@id/song_album"
+    <RelativeLayout
+        android:id="@+id/song_info_relative"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/song_album"
+        android:layout_marginTop="10dp"
         android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginTop="10dp"/>
+        android:layout_marginEnd="10dp">
+        <TextView
+            android:id="@+id/duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="00:00"
+            android:layout_margin="1dp"
+            android:minWidth="15dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"/>
+        <SeekBar
+            android:id="@+id/song_seek_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_toRightOf="@id/duration"
+            android:layout_toLeftOf="@id/max_duration"
+            />
+        <TextView
+            android:id="@+id/max_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="00:00"
+            android:layout_margin="1dp"
+            android:minWidth="15dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+            />
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/song_controls_relative"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="70dp"
+        android:layout_marginEnd="70dp"
+        android:layout_below="@id/song_info_relative">
+        <ImageView
+            android:id="@+id/skip_previous_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/skip_previous"
+            />
+        <ImageView
+            android:id="@+id/pause_resume_button"
+            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/play_circle_outline"
+            />
+        <ImageView
+            android:id="@+id/skip_next_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/skip_next"
+            android:layout_alignParentEnd="true"
+            />
+    </RelativeLayout>
 </RelativeLayout>
