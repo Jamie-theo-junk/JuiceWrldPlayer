@@ -2,22 +2,23 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/music_card_relative"
     android:layout_width="match_parent"
-    android:layout_height="60dp"
+    android:layout_height="80dp"
+    android:layout_marginTop="10dp"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-<androidx.cardview.widget.CardView
-    android:id="@+id/image_card_view"
-    android:layout_width="50dp"
-    android:layout_height="50dp"
-    app:cardBackgroundColor="@color/grey"
-    app:cardCornerRadius="10dp"
-    android:layout_centerVertical="true"
-    android:layout_marginStart="50dp"
-    >
- <ImageView
-     android:id="@+id/song_image"
-     android:layout_width="match_parent"
-     android:layout_height="match_parent"/>
-</androidx.cardview.widget.CardView>
+    <androidx.cardview.widget.CardView
+        android:id="@+id/image_card_view"
+        android:layout_width="65dp"
+        android:layout_height="65dp"
+        app:cardBackgroundColor="@color/grey"
+        app:cardCornerRadius="10dp"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="10dp"
+        >
+        <ImageView
+            android:id="@+id/song_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </androidx.cardview.widget.CardView>
     <RelativeLayout
         android:id="@+id/songInfo"
         android:layout_width="wrap_content"
@@ -25,18 +26,20 @@
         android:layout_centerVertical="true"
         android:layout_toRightOf="@id/image_card_view"
         android:layout_marginLeft="15dp">
-    <TextView
-        android:id="@+id/song_name_txt"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Song Name"
-        />
-    <TextView
-        android:id="@+id/album_txt"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/song_name_txt"
-        android:text="album"/>
+        <TextView
+            android:id="@+id/song_name_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Song Name"
+            android:layout_marginBottom="5dp"
+            android:textSize="20sp"
+            />
+        <TextView
+            android:id="@+id/album_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/song_name_txt"
+            android:text="album"/>
     </RelativeLayout>
 
     <ImageView
