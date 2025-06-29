@@ -57,7 +57,8 @@ object getJuiceWrldSongs{
                             albumName = album ?: "Unknown Album",
                             albumImage = albumId,
                             audioFile = filePath, // Using file path hash as a unique ID
-                            amountPlayed = 0
+                            amountPlayed = 0,
+                            playlists = "none"
                         )
                     )
                 }

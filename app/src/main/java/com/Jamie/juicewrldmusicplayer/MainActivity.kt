@@ -102,7 +102,21 @@ class MainActivity : AppCompatActivity() {
             .replace(R.id.frame_layout,HomeFragment())
             .commit()
 
+        binding.playImage.setOnClickListener {
+            mediaPlayerService?.mediaPlayer?.let { mediaPlayer ->
+                if (mediaPlayer.isPlaying) {
+                    mediaPlayerService!!.pauseMusic()
 
+                    // Stop the runnable updates
+                    handler.removeCallbacks(runnable)
+
+                }
+                 else {
+                    mediaPlayerService!!.resumeMusic()
+
+                }
+            }
+        }
 
     }
 
@@ -129,37 +143,61 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateCurrentSongCard(song: Song?) {
         currentSongCard = binding.currentSongCard
-        currentSongCard.visibility =View.GONE
+        currentSongCard.visibility = View.GONE
+
+
         if (song == null) {
             currentSongCard.visibility = View.GONE
         } else {
             currentSongCard.visibility = View.VISIBLE
+
             val albumUri = ContentUris.withAppendedId(
                 Uri.parse("content://media/external/audio/albumart"),
                 song.albumImage
             )
+
             Glide
                 .with(this)
                 .load(albumUri)
                 .centerCrop()
-                .into(binding.songBackgroundImage);
+                .into(binding.songBackgroundImage)
 
             binding.songNameTxt.text = song.songName
 
-            val formattedTime = formatDuration(mediaPlayerService?.mediaPlayer?.duration!!.toLong())
-            binding.maxTimeStampTxt.text = "/$formattedTime"
+            try {
+                val duration = mediaPlayerService?.mediaPlayer?.duration
+                if (duration != null) {
+                    val formattedTime = formatDuration(duration.toLong())
+                    binding.maxTimeStampTxt.text = "/$formattedTime"
+                } else {
+                    binding.maxTimeStampTxt.text = "/00:00"
+                }
+            } catch (e: IllegalStateException) {
+                e.printStackTrace()
+                binding.maxTimeStampTxt.text = "/00:00"
+            }
+
+            // Define runnable with safe isPlaying check
             runnable = object : Runnable {
                 override fun run() {
-                    if (mediaPlayerService?.mediaPlayer?.isPlaying!!) {
-                        val currentFormattedTime = formatDuration(mediaPlayerService?.mediaPlayer?.currentPosition!!.toLong())
-                        binding.timeStampTxt.text = currentFormattedTime
-                        handler.postDelayed(this, 1000)
+                    mediaPlayerService?.mediaPlayer?.let { mediaPlayer ->
+                        try {
+                            if (mediaPlayer.isPlaying) {
+                                val currentFormattedTime = formatDuration(mediaPlayer.currentPosition.toLong())
+                                binding.timeStampTxt.text = currentFormattedTime
+                                handler.postDelayed(this, 1000)
+                            }
+                        } catch (e: IllegalStateException) {
+                            e.printStackTrace()
+                            handler.removeCallbacks(this)
+                        }
                     }
                 }
             }
+
+            // Start the timer
             handler.postDelayed(runnable, 1000)
         }
-
     }
     private fun formatDuration(duration: Long): String {
         val minutes = duration / 60000

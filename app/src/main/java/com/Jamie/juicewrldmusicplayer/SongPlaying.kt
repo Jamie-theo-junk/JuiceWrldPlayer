@@ -134,6 +134,7 @@ class SongPlaying : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
         }
         selectedSong?.let {
             uiLogic(it)
+            dbHelper.incrementPlayCount(songId)
             mediaPlayerService.playMusic(it)
             val formattedTime = formatDuration(mediaPlayerService.mediaPlayer!!.duration.toLong())
             maxTimeTextView.text = formattedTime
