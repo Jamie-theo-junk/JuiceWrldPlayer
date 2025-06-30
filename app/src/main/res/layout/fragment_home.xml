@@ -63,6 +63,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="See More"
+                        android:textColor="@color/black"
                         android:layout_below="@id/show_more_album"
                         android:layout_centerHorizontal="true"
                         android:textSize="20sp"
@@ -105,8 +106,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Song Name"
+                    android:textColor="@color/black"
                     android:layout_below="@id/most_played_image"
-                    android:layout_centerHorizontal="true"
+                    android:layout_marginLeft="10dp"
                     android:layout_marginTop="5dp"
                     android:textSize="20sp"/>
                 <TextView
@@ -114,9 +116,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Album"
-                    android:layout_centerHorizontal="true"
                     android:layout_marginTop="5dp"
+                    android:layout_marginLeft="10dp"
                     android:textSize="15sp"
+                    android:textColor="@color/black"
                     android:layout_below="@id/song_name"/>
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
