@@ -208,8 +208,6 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         val allSongs = getAllSongs()
         val db = writableDatabase
 
-        db.execSQL("DELETE FROM $ALBUM_TABLE_NAME") // Clear previous records
-
         val grouped = allSongs.groupBy { it.albumName }
 
         for ((albumName, songs) in grouped) {
@@ -217,13 +215,35 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
                 val albumImage = songs.first().albumImage
                 val songIds = songs.joinToString(",") { it.id.toString() }
 
-                val contentValues = ContentValues().apply {
-                    put(ALBUM_NAME_COL, albumName)
-                    put(ALBUM_IMAGE_COL, albumImage)
-                    put(ALBUM_SONGS_COL, songIds)
+                // Check if album already exists
+                val cursor = db.rawQuery(
+                    "SELECT * FROM $ALBUM_TABLE_NAME WHERE $ALBUM_NAME_COL = ?",
+                    arrayOf(albumName)
+                )
+
+                if (cursor.moveToFirst()) {
+                    // Album exists — update it
+                    val contentValues = ContentValues().apply {
+                        put(ALBUM_IMAGE_COL, albumImage)
+                        put(ALBUM_SONGS_COL, songIds)
+                    }
+                    db.update(
+                        ALBUM_TABLE_NAME,
+                        contentValues,
+                        "$ALBUM_NAME_COL = ?",
+                        arrayOf(albumName)
+                    )
+                } else {
+                    // Album doesn't exist — insert it
+                    val contentValues = ContentValues().apply {
+                        put(ALBUM_NAME_COL, albumName)
+                        put(ALBUM_IMAGE_COL, albumImage)
+                        put(ALBUM_SONGS_COL, songIds)
+                    }
+                    db.insert(ALBUM_TABLE_NAME, null, contentValues)
                 }
 
-                db.insert(ALBUM_TABLE_NAME, null, contentValues)
+                cursor.close()
             }
         }
 

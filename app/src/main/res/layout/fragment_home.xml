@@ -63,6 +63,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="See More"
+                        android:textColor="@color/black"
                         android:layout_below="@id/show_more_album"
                         android:layout_centerHorizontal="true"
                         android:textSize="20sp"

@@ -52,11 +52,27 @@ class HomeFragment : Fragment() {
             startActivity(toSong)
         }
         binding.latestAlbum.setOnClickListener {
-        val fragment = AlbumFragment()
+        val fragment = AlbumFragment().apply {
+            arguments = Bundle().apply {
+                putInt("albumId", randomAlbum!!.id)
+                Log.d(TAG, "init: The album id is ${randomAlbum!!.id}")
+            }
+        }
         requireActivity().supportFragmentManager.beginTransaction()
             .replace(R.id.frame_layout, fragment)
             .addToBackStack(null)
             .commit()
+        }
+        binding.showMoreAlbumCardview.setOnClickListener {
+
+            val fragment = AlbumListFragment()
+
+
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.frame_layout, fragment)
+                .addToBackStack(null)
+                .commit()
+
         }
     }
 
