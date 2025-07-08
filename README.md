@@ -1,5 +1,7 @@
 # Juice WRLD Player 
 
+![Main Screen](./screenshots/home_page.png)
+
 **Juice WRLD Player** is a native Android app dedicated entirely to streaming and playing songs by the legendary artist **Juice WRLD**. No distractions, no other artists — just 100% Juice WRLD.
 
 ---
