@@ -13,5 +13,4 @@ data class Song(
     val albumImage: Long,
     val audioFile: String,
     val amountPlayed: Int,
-    val playlists:String
 )

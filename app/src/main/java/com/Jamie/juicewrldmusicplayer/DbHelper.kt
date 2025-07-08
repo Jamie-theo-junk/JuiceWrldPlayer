@@ -19,12 +19,16 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         private const val ALBUM_IMAGE_COL = "album_image"
         private const val AUDIO_FILE_COL = "audio_file"
         private const val AMOUNT_PLAYED = "amount_played"
-        private const val PLAYLISTS_COL = "playlists"
 
         private const val ALBUM_TABLE_NAME = "albums"
         private const val ALBUM_ID_COL = "id"
         private const val ALBUM_NAME_COL = "album_name"
         private const val ALBUM_SONGS_COL = "songs"
+
+        private const val PLAYLIST_NAME="playlists"
+        private const val PLAYLIST_ID_COL = "id"
+        private const val PLAYLIST_NAME_COL ="playlist_names"
+        private const val SONG_ID_COL="playlist_songs_id"
     }
 
 
@@ -35,8 +39,7 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
                 "$ALBUM_COL TEXT NOT NULL," +
                 "$ALBUM_IMAGE_COL INTEGER NOT NULL," +
                 "$AUDIO_FILE_COL TEXT NOT NULL," +
-                "$AMOUNT_PLAYED INTEGER NOT NULL DEFAULT 0," +
-                "$PLAYLISTS_COL TEXT NOT NULL"+
+                "$AMOUNT_PLAYED INTEGER NOT NULL DEFAULT 0" +
                 ")")
 
         val albumQuery = ("CREATE TABLE $ALBUM_TABLE_NAME (" +
@@ -46,6 +49,24 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
                 "$ALBUM_SONGS_COL TEXT NOT NULL" + // comma-separated song names
                 ")")
 
+        val playlistQuery = """
+        CREATE TABLE $PLAYLIST_NAME (
+            $PLAYLIST_ID_COL INTEGER PRIMARY KEY AUTOINCREMENT,
+            $PLAYLIST_NAME_COL TEXT NOT NULL
+        )
+    """.trimIndent()
+
+        val playlistSongsQuery = """
+        CREATE TABLE playlist_songs (
+            $PLAYLIST_ID_COL INTEGER NOT NULL,
+            $SONG_ID_COL INTEGER NOT NULL,
+            FOREIGN KEY($PLAYLIST_ID_COL) REFERENCES $PLAYLIST_NAME($PLAYLIST_ID_COL),
+            FOREIGN KEY($SONG_ID_COL) REFERENCES $JUICE_TABLE_NAME($ID_COL)
+        )
+    """.trimIndent()
+
+        db?.execSQL(playlistQuery)
+        db?.execSQL(playlistSongsQuery)
         db?.execSQL(query)
         db?.execSQL(albumQuery)
     }
@@ -53,6 +74,7 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
         db?.execSQL("DROP TABLE IF EXISTS $JUICE_TABLE_NAME")
         db?.execSQL("DROP TABLE IF EXISTS $ALBUM_TABLE_NAME")
+        db?.execSQL("DROP TABLE IF EXISTS $PLAYLIST_NAME")
         onCreate(db)
     }
 
@@ -64,7 +86,6 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         contentValues.put(ALBUM_IMAGE_COL, song.albumImage)
         contentValues.put(AUDIO_FILE_COL, song.audioFile)
         contentValues.put(AMOUNT_PLAYED, song.amountPlayed)
-        contentValues.put(PLAYLISTS_COL,song.playlists)
 
         val result = db.insert(JUICE_TABLE_NAME, null, contentValues)
         db.close()
@@ -85,7 +106,6 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
                 val albumImageIndex = getColumnIndex(ALBUM_IMAGE_COL)
                 val audioFileIndex = getColumnIndex(AUDIO_FILE_COL)
                 val amountPlayedIndex = getColumnIndex(AMOUNT_PLAYED)
-                val playlists = getColumnIndex(PLAYLISTS_COL)
 
                 // Ensure all column indices are valid before accessing data
                 if (idIndex >= 0 && songNameIndex >= 0 && albumIndex >= 0 &&
@@ -98,8 +118,7 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
                             getString(albumIndex),
                             getLong(albumImageIndex),
                             getString(audioFileIndex),
-                            getInt(amountPlayedIndex),
-                            getString(playlists)
+                            getInt(amountPlayedIndex)
                         )
                     )
                 } else {
@@ -129,8 +148,7 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
                 albumName = cursor.getString(cursor.getColumnIndexOrThrow(ALBUM_COL)),
                 albumImage = cursor.getLong(cursor.getColumnIndexOrThrow(ALBUM_IMAGE_COL)),
                 audioFile = cursor.getString(cursor.getColumnIndexOrThrow(AUDIO_FILE_COL)),
-                amountPlayed = cursor.getInt(cursor.getColumnIndexOrThrow(AMOUNT_PLAYED)),
-                playlists = cursor.getString(cursor.getColumnIndexOrThrow(PLAYLISTS_COL))
+                amountPlayed = cursor.getInt(cursor.getColumnIndexOrThrow(AMOUNT_PLAYED))
             )
         }
 
@@ -139,32 +157,6 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
 
         return song
     }
-
-//    fun deleteUser(id: Int): Boolean{
-//        val db = writableDatabase
-//        val result = db.delete(JUICE_TABLE_NAME, "$ID_COL = ?", arrayOf(id.toString()))
-//        db.close()
-//        return result > 0
-//    }
-//
-//    fun updateUser(song: Song): Boolean {
-//        val db = writableDatabase
-//        val contentValues = ContentValues()
-//        contentValues.put(SONG_NAME_COL, song.songName)
-//        contentValues.put(ALBUM_COL, song.albumName)
-//        contentValues.put(ALBUM_IMAGE_COL, song.albumImage)
-//        contentValues.put(AUDIO_FILE_COL, song.audioFile)
-//        contentValues.put(AMOUNT_PLAYED, song.amountPlayed)
-//
-//        val result = db.update(
-//            JUICE_TABLE_NAME,
-//            contentValues,
-//            "$ID_COL = ?",
-//            arrayOf(song.id.toString())
-//        )
-//        db.close()
-//        return result > 0
-//    }
 
     fun getSongById(songId: Int): Song? {
         val db = readableDatabase
@@ -179,7 +171,6 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
             val albumImageIndex = cursor.getColumnIndex(ALBUM_IMAGE_COL)
             val audioFileIndex = cursor.getColumnIndex(AUDIO_FILE_COL)
             val amountPlayedIndex = cursor.getColumnIndex(AMOUNT_PLAYED)
-            val playlists = cursor.getColumnIndex(PLAYLISTS_COL)
 
             // Ensure indices are valid before fetching data
             if (idIndex >= 0 && songNameIndex >= 0 && albumIndex >= 0 &&
@@ -191,8 +182,7 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
                     albumName = cursor.getString(albumIndex),
                     albumImage = cursor.getLong(albumImageIndex),
                     audioFile = cursor.getString(audioFileIndex),
-                    amountPlayed = cursor.getInt(amountPlayedIndex),
-                    playlists = cursor.getString(playlists)
+                    amountPlayed = cursor.getInt(amountPlayedIndex)
                 )
             }
         }
@@ -271,6 +261,54 @@ class DbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         cursor.close()
         db.close()
         return albums
+    }
+
+    fun addPlaylist(playlist: Playlist): Boolean {
+        val db = writableDatabase
+        val contentValues = ContentValues()
+        contentValues.put(PLAYLIST_NAME_COL, playlist.name)
+        val result = db.insert(PLAYLIST_NAME, null, contentValues)
+        db.close()
+        return result != -1L
+    }
+
+    fun addSongToPlaylist(playlistId: Int, songId: Int): Boolean {
+        val db = writableDatabase
+        val contentValues = ContentValues().apply {
+            put(PLAYLIST_ID_COL, playlistId)
+            put(SONG_ID_COL, songId)
+        }
+        val result = db.insert("playlist_songs", null, contentValues)
+        db.close()
+        return result != -1L
+    }
+
+    fun getSongsForPlaylist(playlistId: Int): List<Song> {
+        val songList = mutableListOf<Song>()
+        val db = readableDatabase
+        val query = """
+        SELECT s.* FROM $JUICE_TABLE_NAME s
+        INNER JOIN playlist_songs ps ON s.$ID_COL = ps.$SONG_ID_COL
+        WHERE ps.$PLAYLIST_ID_COL = ?
+    """.trimIndent()
+        val cursor = db.rawQuery(query, arrayOf(playlistId.toString()))
+
+        while (cursor.moveToNext()) {
+            songList.add(
+                Song(
+                    id = cursor.getInt(cursor.getColumnIndexOrThrow(ID_COL)),
+                    songName = cursor.getString(cursor.getColumnIndexOrThrow(SONG_NAME_COL)),
+                    albumName = cursor.getString(cursor.getColumnIndexOrThrow(ALBUM_COL)),
+                    albumImage = cursor.getLong(cursor.getColumnIndexOrThrow(ALBUM_IMAGE_COL)),
+                    audioFile = cursor.getString(cursor.getColumnIndexOrThrow(AUDIO_FILE_COL)),
+                    amountPlayed = cursor.getInt(cursor.getColumnIndexOrThrow(AMOUNT_PLAYED))
+                )
+            )
+        }
+
+        cursor.close()
+        db.close()
+        return songList
     }
 
     fun incrementPlayCount(songId: Int): Boolean {
